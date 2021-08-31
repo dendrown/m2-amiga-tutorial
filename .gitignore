@@ -1,0 +1,5 @@
+.*.swp
+*.uaem
+bin/
+obj/
+ref/
