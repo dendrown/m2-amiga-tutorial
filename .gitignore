@@ -1,4 +1,5 @@
 .*.swp
+*.dpd
 *.uaem
 bin/
 obj/
