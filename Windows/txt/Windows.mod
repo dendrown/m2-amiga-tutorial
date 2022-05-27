@@ -3,19 +3,21 @@ MODULE Windows;
  * @ref http://www.pjhutchison.org/tutorial/windows.html
  *)
 FROM SYSTEM     IMPORT  ADDRESS, ADR, TAG;
-FROM InOut      IMPORT  ReadCard, WriteLn, WriteString;
-FROM IntuitionD IMPORT  IDCMPFlags, IDCMPFlagSet, NewWindow,
-                        ScreenFlags, ScreenFlagSet, WaTags,
-                        WindowFlags, WindowFlagSet, WindowPtr;
+FROM ExecL      IMPORT  WaitPort;
+FROM GadToolsL  IMPORT  GTGetIMsg, GTReplyIMsg;
+FROM InOut      IMPORT  WriteLn, WriteString;
+FROM InputEvent IMPORT  closewindow;
+FROM IntuitionD IMPORT  IDCMPFlags, IDCMPFlagSet, IntuiMessagePtr,
+                        NewWindow, ScreenFlags, ScreenFlagSet,
+                        WaTags, WindowFlags, WindowFlagSet, WindowPtr;
 FROM IntuitionL IMPORT  intuitionVersion,
                         CloseWindow, OpenWindow, OpenWindowTagList;
 FROM UtilityD   IMPORT  tagEnd, TagItem;
-(*
-FROM GraphicsD  IMPORT  ViewModes, ViewModeSet;
-*)
+
+CONST
+    idcmpCloseWin = IDCMPFlagSet{closeWindow};
 
 VAR
-    fixme  : CARDINAL;
     window : WindowPtr;
 
 
@@ -25,7 +27,6 @@ PROCEDURE MakeWindow(width,
                      title  : ADDRESS) : WindowPtr;
 
 CONST
-    idcmpCloseWin = IDCMPFlagSet{closeWindow};
     winFlags = WindowFlagSet{activate,
                              windowClose,
                              windowDepth,
@@ -80,12 +81,31 @@ END MakeWindow;
 
 
 (* ------------------------------------------------------------------------- *)
+PROCEDURE RunWindow(window : WindowPtr);
+
+VAR
+    byebye : BOOLEAN;
+    winmsg : IntuiMessagePtr;
+
+BEGIN
+    (* All we do is wait for the user click the close gadget *)
+    WHILE (NOT byebye) DO
+        WaitPort(window^.userPort);
+        winmsg := GTGetIMsg(window^.userPort);
+        GTReplyIMsg(winmsg);
+        IF (winmsg^.class = idcmpCloseWin) THEN
+            CloseWindow(window);
+            byebye := TRUE;
+        END;
+    END;
+END RunWindow;
+
+(* ------------------------------------------------------------------------- *)
 BEGIN
     window := MakeWindow(200, 150, ADR("Jen Fenestro"));
 
     IF (window # NIL) THEN
-        ReadCard(fixme);
-        CloseWindow(window);
+        RunWindow(window);
     ELSE
         WriteString("Cannot open window");
         WriteLn;
