@@ -1,7 +1,7 @@
 IMPLEMENTATION MODULE MyWindow;
 (* Amiga Tutorial C -> Modula2
  *
- * The Windows module has been adapted from the stand-alone program
+ * The MyWindow module has been adapted from the stand-alone program
  * we created in the "4. Windows" section of the tutorial.
  *)
 FROM SYSTEM     IMPORT  ADDRESS, ADR, TAG;
