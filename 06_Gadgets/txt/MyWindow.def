@@ -1,0 +1,17 @@
+DEFINITION MODULE MyWindow;
+(* Amiga Tutorial C -> Modula2
+ *
+ * The MyWindow module has been adapted from the stand-alone program
+ * we created in the "4. Windows" section of the tutorial.
+ *)
+FROM SYSTEM     IMPORT  ADDRESS;
+FROM IntuitionD IMPORT   WindowPtr;
+
+
+PROCEDURE MakeWindow(width,
+                     height : INTEGER;
+                     title  : ADDRESS) : WindowPtr;
+
+PROCEDURE RunWindow(window : WindowPtr);
+
+END MyWindow.def

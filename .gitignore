@@ -1,6 +1,7 @@
 .*.swp
 *.dpd
 *.uaem
+*.modE
 bin/
 obj/
 ref/
