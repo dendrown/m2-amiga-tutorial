@@ -1,7 +1,7 @@
-MODULE Gadgets;
 (* Amiga Tutorial C -> Modula2
  * @ref http://www.pjhutchison.org/tutorial/gadgets.html
  *)
+MODULE Gadgets;
 
 (* System imports *)
 FROM Arts       IMPORT  Assert;

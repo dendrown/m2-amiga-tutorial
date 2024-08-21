@@ -1,9 +1,10 @@
-IMPLEMENTATION MODULE MyWindow;
 (* Amiga Tutorial C -> Modula2
  *
  * The MyWindow module has been adapted from the stand-alone program
  * we created in the "4. Windows" section of the tutorial.
  *)
+IMPLEMENTATION MODULE MyWindow;
+
 FROM SYSTEM     IMPORT  ADDRESS, ADR, TAG;
 FROM ExecL      IMPORT  WaitPort;
 FROM GadToolsL  IMPORT  GTGetIMsg, GTReplyIMsg;
@@ -52,23 +53,16 @@ BEGIN
                                         tagEnd));
     ELSE
         WITH newwin DO
-            leftEdge := 20;
-            topEdge := 20;
-            width := width;
-            height := height;
-            detailPen := 0;
-            blockPen := 1;
-            idcmpFlags := idcmpCloseWin;
-            flags := winFlags;
+            leftEdge := 20;                 topEdge := 20;
+            width := width;                 height := height;
+            detailPen := 0;                 blockPen := 1;
+            idcmpFlags := idcmpCloseWin;    flags := winFlags;
             firstGadget := NIL;
             checkMark := NIL;
             title := title;
-            screen := NIL;
-            bitMap := NIL;
-            minWidth := 0;
-            minHeight := 0;
-            maxWidth := 600;
-            maxHeight := 400;
+            screen := NIL;                  bitMap := NIL;
+            minWidth := 0;                  minHeight := 0;
+            maxWidth := 600;                maxHeight := 400;
             type := ScreenFlagSet{wbenchScreen};
         END;
         window := OpenWindow(newwin);
