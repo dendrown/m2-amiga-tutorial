@@ -6,10 +6,11 @@
 IMPLEMENTATION MODULE MyWindow;
 
 FROM SYSTEM     IMPORT  ADDRESS, ADR, TAG;
+FROM Arts       IMPORT  Assert;
 FROM ExecL      IMPORT  WaitPort;
-FROM GadToolsL  IMPORT  GTGetIMsg, GTReplyIMsg;
+FROM GadToolsL  IMPORT  GTGetIMsg, GTRefreshWindow, GTReplyIMsg;
 FROM InputEvent IMPORT  closewindow;
-FROM IntuitionD IMPORT  IDCMPFlags, IDCMPFlagSet, IntuiMessagePtr,
+FROM IntuitionD IMPORT  GadgetPtr, IDCMPFlags, IDCMPFlagSet, IntuiMessagePtr,
                         NewWindow, ScreenFlags, ScreenFlagSet,
                         WaTags, WindowFlags, WindowFlagSet, WindowPtr;
 FROM IntuitionL IMPORT  intuitionVersion,
@@ -21,8 +22,11 @@ CONST
 
 
 (* ------------------------------------------------------------------------- *)
-PROCEDURE MakeWindow(width,
+PROCEDURE MakeWindow(left,
+                     top,
+                     width,
                      height : INTEGER;
+                     gadgets: GadgetPtr;
                      title  : ADDRESS) : WindowPtr;
 
 CONST
@@ -35,39 +39,20 @@ VAR
     newwin : NewWindow;
     window : WindowPtr;
 
-    tags : ARRAY[0..20] OF LONGINT;
+    tags : ARRAY[0..22] OF LONGINT;
 
 BEGIN
-    IF intuitionVersion >= 36 THEN
-        window := OpenWindowTagList(ADR(newwin),
-                                    TAG(tags,
-                                        waLeft, 20,
-                                        waTop, 20,
-                                        waTitle, title,
-                                        waWidth, width,
-                                        waHeight, height,
-                                        waIDCMP, idcmpCloseWin,
-                                        waFlags, winFlags,
-                                        waTitle, title,
-                                        waPubScreenName, ADR("Workbench"),
-                                        tagEnd));
-    ELSE
-        WITH newwin DO
-            leftEdge := 20;                 topEdge := 20;
-            width := width;                 height := height;
-            detailPen := 0;                 blockPen := 1;
-            idcmpFlags := idcmpCloseWin;    flags := winFlags;
-            firstGadget := NIL;
-            checkMark := NIL;
-            title := title;
-            screen := NIL;                  bitMap := NIL;
-            minWidth := 0;                  minHeight := 0;
-            maxWidth := 600;                maxHeight := 400;
-            type := ScreenFlagSet{wbenchScreen};
-        END;
-        window := OpenWindow(newwin);
-    END;
-
+    Assert(intuitionVersion>=36, ADR("Gadget Window requires Kickstart 2.0 [36]+"));
+    window := OpenWindowTagList(ADR(newwin),
+                                TAG(tags,
+                                    waLeft, left,   waTop, top,
+                                    waWidth, width, waHeight, height,
+                                    waIDCMP, IDCMPFlagSet{closeWindow,gadgetUp},
+                                    waFlags, winFlags,
+                                    waGadgets, gadgets,
+                                    waTitle, title,
+                                    waPubScreenName, ADR("Workbench"),
+                                    tagEnd));
     RETURN window;
 END MakeWindow;
 
@@ -80,6 +65,9 @@ VAR
     winmsg : IntuiMessagePtr;
 
 BEGIN
+    (* Update window *)
+    GTRefreshWindow(window, NIL);
+
     (* All we do is wait for the user click the close gadget *)
     WHILE (NOT byebye) DO
         WaitPort(window^.userPort);

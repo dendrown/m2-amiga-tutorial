@@ -6,11 +6,14 @@
 DEFINITION MODULE MyWindow;
 
 FROM SYSTEM     IMPORT  ADDRESS;
-FROM IntuitionD IMPORT   WindowPtr;
+FROM IntuitionD IMPORT  GadgetPtr, WindowPtr;
 
 
-PROCEDURE MakeWindow(width,
+PROCEDURE MakeWindow(left,
+                     top,
+                     width,
                      height : INTEGER;
+                     gadgets: GadgetPtr;
                      title  : ADDRESS) : WindowPtr;
 
 PROCEDURE RunWindow(window : WindowPtr);
