@@ -5,85 +5,129 @@ MODULE Gadgets;
 
 (* System imports *)
 FROM Arts       IMPORT  Assert;
-FROM GadToolsD  IMPORT  GtTags, NewGadget, NewGadgetFlags, NewGadgetFlagSet,
-                        stringKind;
+FROM GadToolsD  IMPORT  GtTags, NewGadget, NewGadgetFlags, NewGadgetFlagSet;
 FROM GadToolsL  IMPORT  CreateContext, CreateGadgetA,  FreeGadgets, FreeVisualInfo,
                         GetVisualInfoA;
 FROM GraphicsD  IMPORT  FontStyleSet, FontFlags, FontFlagSet, TextAttr;
+FROM InOut      IMPORT  WriteInt, WriteLn, WriteString;
 FROM IntuitionD IMPORT  GadgetPtr, ScreenPtr, WindowPtr;
 FROM IntuitionL IMPORT  LockPubScreen, UnlockPubScreen;
 FROM SYSTEM     IMPORT  ADDRESS, ADR, TAG;
-FROM UtilityD   IMPORT  tagDone;
+FROM UtilityD   IMPORT  Tag, tagDone;
 
 IMPORT
+    GAD: GadToolsD,
     RC : ReplyVals;
 
 (* Tutorial imports *)
 FROM MyWindow   IMPORT  MakeWindow, RunWindow;
 
-VAR
-    pubScreen : ScreenPtr;
+CONST
+    gadgetCount = 3;
 
-    visual  : ADDRESS;
+TYPE
+    Tags    = ARRAY[1..3] OF LONGCARD;
+    GadTags = ARRAY[1..gadgetCount] OF Tags;
+
+    GadKinds = ARRAY[1..gadgetCount] OF LONGCARD;
+    GadSpecs = ARRAY[1..gadgetCount] OF NewGadget;
+
+VAR
+    screen  : ScreenPtr;
     window  : WindowPtr;
-    gad1    : GadgetPtr;
-    gadList : GadgetPtr;
-    gadData : NewGadget;
+    visual  : ADDRESS;
     topaz8  : TextAttr;
-    tags    : ARRAY[1..3] OF LONGINT;
+
+    gadList : GadgetPtr;
+    tags    : Tags;
 
 
 (* ------------------------------------------------------------------------- *)
+PROCEDURE InitGadList;
+CONST
+    textLeft = NewGadgetFlagSet{placetextLeft};
+    textIn   = NewGadgetFlagSet{placetextIn};
+
+VAR
+    i : INTEGER;
+    gadKinds: GadKinds;
+    gadSpecs: GadSpecs;
+    gadTags : GadTags;
+    gadget  : GadgetPtr;
+
+    (* --------------------------------------------------------------------- *)
+    PROCEDURE SpecGadget(id : CARDINAL;
+                         left, top, w, h : INTEGER;
+                         flags : NewGadgetFlagSet;
+                         name  : ADDRESS);
+
+    BEGIN
+        WITH gadSpecs[id] DO
+            gadgetID := id;     gadgetText := name;
+            leftEdge := left;   topEdge := top;
+            width := w;         height := h;
+            flags := flags;     textAttr := ADR(topaz8);
+            userData := NIL;    visualInfo := ADR(visual)
+        END
+    END SpecGadget;
+
+
+BEGIN
+    topaz8 := TextAttr{name:ADR("topaz.font"), ySize:8,
+                       style:FontStyleSet{}, flags:FontFlagSet{romFont}};
+
+    gadKinds := GadKinds{GAD.stringKind, GAD.integerKind, GAD.buttonKind};
+    gadTags[1] := Tags{Tag(gtstMaxChars), 256, tagDone};
+    gadTags[2] := Tags{Tag(gtnmBorder), Tag(TRUE), tagDone};
+    gadTags[3] := Tags{tagDone, 0, 0};
+
+    (* gadSpecs:  LFT  TOP   W   H *)
+    SpecGadget(1,  63,  26, 172, 13, textLeft, ADR("Name"));
+    SpecGadget(2,  62,  50, 175, 15, textLeft, ADR("Age"));
+    SpecGadget(3, 111, 105,  54, 31, textIn,   ADR("Calc!"));
+
+    gadList := NIL;
+    gadget := CreateContext(gadList);
+    Assert(gadget#NIL, ADR("Failed to create GadTools context"));
+
+    FOR i := 1 TO gadgetCount DO
+        gadget := CreateGadgetA(gadKinds[i], gadget^, gadSpecs[i], ADR(gadTags[i]));
+        Assert(gadget#NIL, ADR("Failed to create gadget"));
+        WriteString('Created gadget #');
+        WriteInt(i,1);
+        WriteLn
+    END
+END InitGadList;
+
 
 (* ------------------------------------------------------------------------- *)
 BEGIN
-    pubScreen := LockPubScreen(NIL);
-    Assert(pubScreen#NIL, ADR("Cannot lock public screen"));
+    screen := LockPubScreen(NIL);
+    Assert(screen#NIL, ADR("Cannot lock public screen"));
 
-    visual := GetVisualInfoA(pubScreen, TAG(tags, tagDone));
+    visual := GetVisualInfoA(screen, TAG(tags, tagDone));
     Assert(visual#NIL, ADR("Failed to get visual info"));
 
-    (* Move to GadInit procedure *)
-    WITH topaz8 DO
-        name := ADR("topaz.font");
-        ySize := 8;
-        style := FontStyleSet{};
-        flags := FontFlagSet{romFont}
-    END;
-    WITH gadData DO
-        leftEdge := 63; topEdge := 26;
-        width := 172;   height := 13;
-        gadgetText := ADR("Name");
-        textAttr := ADR(topaz8);
-        gadgetID := 1;
-        flags := NewGadgetFlagSet{placetextLeft};
-        visualInfo := ADR(visual);                  (* Watch out! *)
-        userData := NIL
-    END;
-
-    gadList := NIL;
-    gad1 := CreateContext(gadList);
-    Assert(gad1#NIL, ADR("Failed to create GadTools context"));
-
-    gad1 := CreateGadgetA(stringKind, gad1^, gadData, TAG(tags, gtstMaxChars, 256, tagDone));
-
+    InitGadList;
     window := MakeWindow(10, 15, 280, 180, gadList, ADR("Gadget Window"));
     Assert(window#NIL, ADR("Cannot create window"));
 
     RunWindow(window);
 
 CLOSE
+    (* The CLOSE section MUST be reentrant *)
     IF gadList # NIL THEN
-        FreeGadgets(gadList)
+        FreeGadgets(gadList);
+        gadList := NIL
     END;
 
     IF visual # NIL THEN
-        UnlockPubScreen(NIL, pubScreen)
+        FreeVisualInfo(visual);
+        visual := NIL
     END;
-    visual := NIL;
 
-    IF pubScreen # NIL THEN
-        UnlockPubScreen(NIL, pubScreen)
-    END;
-    pubScreen := NIL
+    IF screen # NIL THEN
+        UnlockPubScreen(NIL, screen);
+        screen := NIL
+    END
 END Gadgets.

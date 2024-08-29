@@ -31,6 +31,7 @@ PROCEDURE MakeWindow(left,
 
 CONST
     winFlags = WindowFlagSet{activate,
+                             windowRefresh,
                              windowClose,
                              windowDepth,
                              windowDrag,
@@ -75,9 +76,9 @@ BEGIN
         GTReplyIMsg(winmsg);
         IF (winmsg^.class = idcmpCloseWin) THEN
             CloseWindow(window);
-            byebye := TRUE;
-        END;
-    END;
+            byebye := TRUE
+        END
+    END
 END RunWindow;
 
 END MyWindow.
