@@ -48,7 +48,7 @@ BEGIN
                                 TAG(tags,
                                     waLeft, left,   waTop, top,
                                     waWidth, width, waHeight, height,
-                                    waIDCMP, IDCMPFlagSet{closeWindow,gadgetUp},
+                                    waIDCMP, IDCMPFlagSet{closeWindow,gadgetUp,refreshWindow},
                                     waFlags, winFlags,
                                     waGadgets, gadgets,
                                     waTitle, title,
