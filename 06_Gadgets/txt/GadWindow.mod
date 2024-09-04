@@ -6,6 +6,7 @@ FROM SYSTEM     IMPORT  ADDRESS, ADR, TAG;
 FROM Arts       IMPORT  Assert;
 FROM ExecL      IMPORT  WaitPort;
 FROM GadToolsL  IMPORT  GTGetIMsg, GTRefreshWindow, GTReplyIMsg;
+FROM InOut      IMPORT  WriteInt, WriteLn, WriteString;
 FROM InputEvent IMPORT  closewindow;
 FROM IntuitionD IMPORT  GadgetPtr, IDCMPFlags, IDCMPFlagSet, IntuiMessagePtr,
                         NewWindow, ScreenFlags, ScreenFlagSet,
@@ -16,6 +17,7 @@ FROM UtilityD   IMPORT  tagEnd, TagItem;
 
 CONST
     idcmpCloseWin = IDCMPFlagSet{closeWindow};
+    idcmpGadgetUp = IDCMPFlagSet{gadgetUp};
 
 
 (* ------------------------------------------------------------------------- *)
@@ -61,12 +63,13 @@ PROCEDURE RunWindow(window : WindowPtr);
 VAR
     byebye : BOOLEAN;
     winmsg : IntuiMessagePtr;
+    gadget : GadgetPtr;
 
 BEGIN
     (* Update window *)
     GTRefreshWindow(window, NIL);
 
-    (* All we do is wait for the user click the close gadget *)
+    (* Identify our custom gadgets until the user clicks the close gadget *)
     WHILE (NOT byebye) DO
         WaitPort(window^.userPort);
         winmsg := GTGetIMsg(window^.userPort);
@@ -74,6 +77,12 @@ BEGIN
         IF (winmsg^.class = idcmpCloseWin) THEN
             CloseWindow(window);
             byebye := TRUE
+        ELSIF (winmsg^.class = idcmpGadgetUp) THEN
+            gadget := winmsg^.iAddress;
+            Assert(gadget#NIL, ADR("Invalid gadget in window message"));
+            WriteString('Accessed gadget #');
+            WriteInt(gadget^.gadgetID,1);
+            WriteLn
         END
     END
 END RunWindow;
