@@ -1,9 +1,10 @@
 (* Amiga Tutorial C -> Modula2
  *
- * The MyWindow module has been adapted from the stand-alone program
- * we created in the "4. Windows" section of the tutorial.
+ * The GadWindow module has been adapted from the stand-alone program
+ * we created in the "04_Windows" section of the tutorial. Here, we've
+ * updated it with a bit of gadget-specific functionality.
  *)
-DEFINITION MODULE MyWindow;
+DEFINITION MODULE GadWindow;
 
 FROM SYSTEM     IMPORT  ADDRESS;
 FROM IntuitionD IMPORT  GadgetPtr, WindowPtr;
@@ -18,4 +19,4 @@ PROCEDURE MakeWindow(left,
 
 PROCEDURE RunWindow(window : WindowPtr);
 
-END MyWindow.def
+END GadWindow.def

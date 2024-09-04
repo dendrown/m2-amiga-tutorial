@@ -20,7 +20,7 @@ IMPORT
     RC : ReplyVals;
 
 (* Tutorial imports *)
-FROM MyWindow   IMPORT  MakeWindow, RunWindow;
+FROM GadWindow  IMPORT  MakeWindow, RunWindow;
 
 CONST
     gadgetCount = 3;

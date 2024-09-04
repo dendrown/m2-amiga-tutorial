@@ -1,9 +1,6 @@
 (* Amiga Tutorial C -> Modula2
- *
- * The MyWindow module has been adapted from the stand-alone program
- * we created in the "4. Windows" section of the tutorial.
  *)
-IMPLEMENTATION MODULE MyWindow;
+IMPLEMENTATION MODULE GadWindow;
 
 FROM SYSTEM     IMPORT  ADDRESS, ADR, TAG;
 FROM Arts       IMPORT  Assert;
@@ -81,4 +78,4 @@ BEGIN
     END
 END RunWindow;
 
-END MyWindow.
+END GadWindow.
